@@ -176,7 +176,7 @@ def read_data_sets(train_dir,
 
 
 
-def load_mnist(train_dir='/home/sanjana/PycharmProjects/DeepLearning/'):
+def load_data(train_dir='/home/sanjana/PycharmProjects/DeepLearning/'):
   return read_data_sets(train_dir)
 
 
