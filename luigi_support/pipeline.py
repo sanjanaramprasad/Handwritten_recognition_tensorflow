@@ -125,30 +125,30 @@ class encode(luigi.Task):
         with self.output().open('w') as out_file:
             if str(self.input_dir)[-1] != '/':
                 self.input_dir += '/'
-            fs = [config.input_dir + x for x in np.sort(os.listdir(str(self.input_dir))) if '.png' in x]
+            fs = [self.input_dir + x for x in np.sort(os.listdir(str(self.input_dir))) if '.png' in x]
             num_imgs = len(fs)
             output_file = open(str(self.output_filename), "wb")
             print (num_imgs)
-            if self.label:
+            if self.label == 1:
                 magic_num = 2049
             else:
                 magic_num = 2051
             output_file.write(struct.pack('>i', magic_num))
             output_file.write(struct.pack('>i', num_imgs))
 
-            if not self.label:
+            if self.label == 0:
                 im = np.asarray(Image.open(fs[0]).convert('L'), dtype=np.uint32)
                 r, c = im.shape
                 output_file.write(struct.pack('>i', r))
                 output_file.write(struct.pack('>i', c))
 
             for img in range(num_imgs):
-                if self.label:
+                if self.label == 1:
                     if re.match(config.input_dir + 'match.*', fs[img]):
                         label = 1
                     elif re.match(config.input_dir + 'mis_match.*', fs[img]):
                         label = 0
-                    label = np.uint32(self.label)
+                    label = np.uint32(label)
                     print label
                     output_file.write(struct.pack('>B', label))
                 else:
@@ -178,10 +178,10 @@ class encode_data(luigi.Task):
             output_dir = os.getcwd()
             training_dir = output_dir + '/' + config.training_dir + '/'
             testing_dir = output_dir + '/' + config.testing_dir + '/'
-            yield encode(training_dir, 'training-images-and-ubyte_v2',label=False)
-            yield encode(training_dir, 'training-labels-and-ubyte_v2',label=True)
-            yield encode(testing_dir, 'testing-images-and-ubyte_v2',label=False)
-            yield encode(testing_dir, 'testing-labels-and-ubyte_v2', label=True)
+            yield encode(training_dir, 'training-images-and-ubyte_v2',label=0)
+            yield encode(training_dir, 'training-labels-and-ubyte_v2',label=1)
+            yield encode(testing_dir, 'testing-images-and-ubyte_v2',label=0)
+            yield encode(testing_dir, 'testing-labels-and-ubyte_v2', label=1)
             out_file.write("Status : done")
 
 
