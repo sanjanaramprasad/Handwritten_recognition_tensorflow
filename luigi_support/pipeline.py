@@ -46,7 +46,7 @@ class match_images(luigi.Task):
                             img.save(os.path.join(self.dirs_1[1], name))
                         else:
                             img.save(os.path.join(self.dirs_1[0], name))
-        out_file.write("Status : done")
+            out_file.write("Status : done")
 
 
 class non_match_images(luigi.Task):
