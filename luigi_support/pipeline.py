@@ -143,6 +143,7 @@ class encode(luigi.Task):
                 output_file.write(struct.pack('>i', c))
 
             for img in range(num_imgs):
+                print img
                 if self.label == 1:
                     if re.match(config.input_dir + 'match.*', fs[img]):
                         label = 1
