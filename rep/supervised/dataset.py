@@ -12,13 +12,12 @@ def _read32(bytestream):
 def dense_to_one_hot(labels_dense, num_classes):
   """Convert class labels from scalars to one-hot vectors."""
   num_labels = labels_dense.shape[0]
-  index_offset = numpy.arange(num_labels) * num_classes
-  labels_one_hot = numpy.zeros((num_labels, num_classes))
+  index_offset = np.arange(num_labels) * num_classes
+  labels_one_hot = np.zeros((num_labels, num_classes))
   labels_one_hot.flat[index_offset + labels_dense.ravel()] = 1
   return labels_one_hot
 
 def extract_images(f):
-
   print('Extracting', f.name)
   with gzip.GzipFile(fileobj=f) as bytestream:
     magic = _read32(bytestream)
@@ -101,7 +100,26 @@ class DataSet(object):
     def epochs_completed(self):
         return self._epochs_completed
 
-    def next_batch(self, batch_size, fake_data=False):
+    def next_batch(self, batch_size=100):
+        current_permutation = np.random.permutation(range(len(self._images)))
+        epoch_images = self._images[current_permutation, ...]
+        if self._labels is not None:
+            epoch_labels = self._labels[current_permutation, ...]
+
+        # Then iterate over the epoch
+        self.current_batch_idx = 0
+        while self.current_batch_idx < len(self._images):
+            end_idx = min(
+                self.current_batch_idx + batch_size, len(self._images))
+            this_batch = {
+                'images': epoch_images[self.current_batch_idx:end_idx],
+                'labels': epoch_labels[self.current_batch_idx:end_idx]
+                if self.labels is not None else None
+            }
+            self.current_batch_idx += batch_size
+            yield this_batch['images'], this_batch['labels']
+
+    '''def next_batch(self, batch_size, fake_data=False):
         start = self._index_in_epoch
         self._index_in_epoch += batch_size
         if self._index_in_epoch > self._num_examples:
@@ -117,7 +135,7 @@ class DataSet(object):
           self._index_in_epoch = batch_size
           assert batch_size <= self._num_examples
         end = self._index_in_epoch
-        return self._images[start:end], self._labels[start:end]
+        return self._images[start:end], self._labels[start:end]'''
 
 def read_data_sets(train_dir,
                      fake_data=False,
@@ -176,13 +194,15 @@ def read_data_sets(train_dir,
 
 
 
-def load_data(train_dir='/home/sanjana/PycharmProjects/DeepLearning/'):
+def load_data_sets(train_dir='/home/sanjana/PycharmProjects/DeepLearning/'):
   return read_data_sets(train_dir)
 
 
 
 
 
-#data = read_data_sets('/home/sanjana/PycharmProjects/DeepLearning/')
-#data2 = data.train.next_batch(100)
-#print (data2)
+'''data = read_data_sets('/home/sanjana/PycharmProjects/DeepLearning/')
+for batch_xs , batch_ys in data.train.next_batch():
+    #print(batch_xs.shape)
+    print (batch_xs)'''
+
