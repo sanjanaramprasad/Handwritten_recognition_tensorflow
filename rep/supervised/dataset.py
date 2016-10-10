@@ -99,8 +99,25 @@ class DataSet(object):
     @property
     def epochs_completed(self):
         return self._epochs_completed
+    def next_batch(self, batch_size = 128):
+      start = self._index_in_epoch
+      self._index_in_epoch += batch_size
+      if self._index_in_epoch > self._num_examples:
+        # Finished epoch
+        self._epochs_completed += 1
+        # Shuffle the data
+        perm = numpy.arange(self._num_examples)
+        numpy.random.shuffle(perm)
+        self._images = self._images[perm]
+        self._labels = self._labels[perm]
+        # Start next epoch
+        start = 0
+        self._index_in_epoch = batch_size
+        assert batch_size <= self._num_examples
+      end = self._index_in_epoch
+      return self._images[start:end], self._labels[start:end]
 
-    def next_batch(self, batch_size=100):
+    '''def next_batch(self, batch_size=100):
         current_permutation = np.random.permutation(range(len(self._images)))
         epoch_images = self._images[current_permutation, ...]
         if self._labels is not None:
@@ -117,7 +134,8 @@ class DataSet(object):
                 if self.labels is not None else None
             }
             self.current_batch_idx += batch_size
-            yield this_batch['images'], this_batch['labels']
+            yield this_batch['images'], this_batch['labels']'''
+    
 
     '''def next_batch(self, batch_size, fake_data=False):
         start = self._index_in_epoch
