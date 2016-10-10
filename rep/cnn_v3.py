@@ -12,8 +12,9 @@ from __future__ import print_function
 import tensorflow as tf
 
 # Import MNIST data
-from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
+# from tensorflow.examples.tutorials.mnist import input_data
+# mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
+ds = dataset.read_data_sets('/home/sanjana/PycharmProjects/DeepLearning/',one_hot=True)
 
 # Parameters
 learning_rate = 0.001
@@ -112,7 +113,7 @@ with tf.Session() as sess:
     step = 1
     # Keep training until reach max iterations
     while step * batch_size < training_iters:
-        batch_x, batch_y = mnist.train.next_batch(batch_size)
+        batch_x, batch_y = ds.train.next_batch(batch_size)
         # Run optimization op (backprop)
         sess.run(optimizer, feed_dict={x: batch_x, y: batch_y
                                       })
@@ -120,7 +121,7 @@ with tf.Session() as sess:
             # Calculate batch loss and accuracy
             loss, acc = sess.run([cost, accuracy], feed_dict={x: batch_x,
                                                               y: batch_y,
-                                                              keep_prob: 1.})
+                                                              })
             print("Iter " + str(step*batch_size) + ", Minibatch Loss= " + \
                   "{:.6f}".format(loss) + ", Training Accuracy= " + \
                   "{:.5f}".format(acc))
@@ -129,6 +130,6 @@ with tf.Session() as sess:
 
     # Calculate accuracy for 256 mnist test images
     print("Testing Accuracy:", \
-        sess.run(accuracy, feed_dict={x: mnist.test.images[:256],
-                                      y: mnist.test.labels[:256],
-                                      keep_prob: 1.}))
+        sess.run(accuracy, feed_dict={x: valid.images[:256],
+                                      y: valid.images[:256],
+                                      }))
