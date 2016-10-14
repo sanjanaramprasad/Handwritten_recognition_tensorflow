@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.misc import imresize
-import Image
+from PIL import Image
 import random
 import gzip
 import os
@@ -125,18 +125,21 @@ class encode(luigi.Task):
         with self.output().open('w') as out_file:
             if str(self.input_dir)[-1] != '/':
                 self.input_dir += '/'
-            fs = [self.input_dir + x for x in np.sort(os.listdir(str(self.input_dir))) if '.png' in x]
+
+	    l = os.listdir(str(self.input_dir))
+	    random.shuffle(l)
+            fs = [self.input_dir + x for x in l if '.png' in x]
             num_imgs = len(fs)
             output_file = open(str(self.output_filename), "wb")
             print (num_imgs)
-            if self.label == 1:
+            if self.label == "label":
                 magic_num = 2049
             else:
                 magic_num = 2051
             output_file.write(struct.pack('>i', magic_num))
             output_file.write(struct.pack('>i', num_imgs))
 
-            if self.label == 0:
+            if self.label == "image":
                 im = np.asarray(Image.open(fs[0]).convert('L'), dtype=np.uint32)
                 r, c = im.shape
                 output_file.write(struct.pack('>i', r))
@@ -144,14 +147,17 @@ class encode(luigi.Task):
 
             for img in range(num_imgs):
                 print img
-                if self.label == 1:
-                    if re.match(config.input_dir + 'match.*', fs[img]):
-                        label = 1
-                    elif re.match(config.input_dir + 'mis_match.*', fs[img]):
-                        label = 0
-                    label = np.uint32(label)
-                    print label
-                    output_file.write(struct.pack('>B', label))
+                if self.label == "label":
+                    if re.match(self.input_dir + 'match.*', fs[img]):
+                        #print fs[img]
+                        target = 1
+                    elif re.match(self.input_dir + 'mis_match.*', fs[img]):
+                        #print fs[img]
+                        target = 0
+		    print target
+                    target = np.uint32(target)
+                    #print target
+                    output_file.write(struct.pack('>B', target))
                 else:
                     im = np.asarray(Image.open(fs[img]).convert('L'), dtype=np.uint32)
                     for i in xrange(im.shape[0]):
@@ -179,13 +185,14 @@ class encode_data(luigi.Task):
             output_dir = os.getcwd()
             training_dir = output_dir + '/' + config.training_dir + '/'
             testing_dir = output_dir + '/' + config.testing_dir + '/'
-            yield encode(training_dir, 'training-images-and-ubyte_v2',label=0)
-            yield encode(training_dir, 'training-labels-and-ubyte_v2',label=1)
-            yield encode(testing_dir, 'testing-images-and-ubyte_v2',label=0)
-            yield encode(testing_dir, 'testing-labels-and-ubyte_v2', label=1)
+            yield encode(training_dir, 'training-images-and-ubyte',label="image")
+            yield encode(training_dir, 'training-labels-and-ubyte',label="label")
+            yield encode(testing_dir, 'testing-images-and-ubyte',label="image")
+            yield encode(testing_dir, 'testing-labels-and-ubyte', label="label")
             out_file.write("Status : done")
 
 
 
 if __name__ == '__main__':
     luigi.run()
+
