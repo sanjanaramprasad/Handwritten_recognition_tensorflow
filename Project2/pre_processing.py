@@ -102,10 +102,10 @@ resize_y = 230
 matching_training_data(input_dir,matching_output_file,resize_x,resize_y)
 
 # Number of mismatch data wanted
-number_of_mismatches = 80000
+number_of_mismatches = 4500
 
 # Donot change this - remains constant
-number_of_person_sampled = 1500
+number_of_person_sampled = 1568
 number_of_mis_match_per_person_to_be_generated = int(number_of_mismatches/number_of_person_sampled)
 
 # Call method to create not - matching training data
