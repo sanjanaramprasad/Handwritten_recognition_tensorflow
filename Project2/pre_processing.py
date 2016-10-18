@@ -77,7 +77,7 @@ def not_matching_training_data(input_dir,not_matching_output_file_name, resize_x
                         '''Create a dictionary with
                            key - number autoincremented
                            value - list with three elements [0] - label, [1] - first image 1d, [2] - second image 1d '''
-                        not_matching_image_dict[index_in_file] = ['0', first_img, second_img]
+                        not_matching_image_dict[index_in_file] = ['1', first_img, second_img]
 
                         # Increment the index counter
                         index_in_file += 1
